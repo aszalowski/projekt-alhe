@@ -1,13 +1,13 @@
 from sklearn.model_selection import train_test_split
 from Phenotype import Phenotype
-from Roulette import Roulette
+from Roulette import Roulette, RankSelection
 import random
 
-POPULATION_SIZE = 20
+POPULATION_SIZE = 100
 TEST_SIZE = 0.2
 CROSSOVER_PROB = 1
-PHENOTYPE_MUTATION_PROB = 0.5  
-PARAMETER_MUTATION_PROB = 0.5
+PHENOTYPE_MUTATION_PROB = 1
+PARAMETER_MUTATION_PROB = 0.1
 
 class XGBoostTuner:
     """
@@ -19,7 +19,7 @@ class XGBoostTuner:
     :param population: list of phenotypes
     """
     def __init__(self, X, y):
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=0)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=10)
         self.fitness_history = []
         self.population = []
 
@@ -47,7 +47,7 @@ class XGBoostTuner:
         new_population = []
 
         self.sortPopulation()
-        roulette = Roulette(self.population)
+        roulette = RankSelection(self.population)
         while len(new_population) != POPULATION_SIZE:
             if random.uniform(0, 1) < CROSSOVER_PROB:
                 first_parent_index, second_parent_index = roulette.chooseIndexes()

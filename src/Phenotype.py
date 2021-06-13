@@ -2,7 +2,7 @@ from helpers import initializeXGBoostParameters
 from Parameters import DiscreteParameter
 
 
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score
 import xgboost as xgb
 import random
 
@@ -17,6 +17,7 @@ class Phenotype:
     def __init__(self):
         self.param_list = initializeXGBoostParameters()
         self.fitness_score = None
+        self.accuracy = None
 
     def mutate(self, mutation_prob):
         for parameter in self.param_list:
@@ -27,7 +28,8 @@ class Phenotype:
         xg_clas = xgb.XGBClassifier(**self.get_params(), use_label_encoder=False)
         xg_clas.fit(X_train, y_train, eval_metric = "mlogloss")                   
         preds = xg_clas.predict(X_test)
-        self.fitness_score = f1_score(y_test, preds, average="micro")
+        self.fitness_score = f1_score(y_test, preds)
+        self.accuracy = accuracy_score(y_test, preds)
 
     def get_params(self):
         params = {}
@@ -36,7 +38,7 @@ class Phenotype:
         return params
 
     def __repr__(self):
-        string = f'Phenotype[fitness={self.fitness_score}](\n'
+        string = f'Phenotype[fitness={self.fitness_score}, acc={self.accuracy}](\n'
         for p in self.param_list:
             string += f'\t{p}\n'
         string += ')'
@@ -46,9 +48,10 @@ class Phenotype:
     def crossover(parent1, parent2, crossover_point=0.5):
         child = Phenotype()
         for (child_param, p1, p2) in zip(child.param_list, parent1.param_list, parent2.param_list):
-            child_param.value = crossover_point * p1.value + (1 - crossover_point) * p2.value
-            if isinstance(child_param, DiscreteParameter):
-                child_param.value = int(round(p1.value))
+            if random.uniform(0, 1) < crossover_point:
+                child_param.value = p1.value
+            else:
+                child_param.value = p2.value
 
         # print("Created new child.")
         # print(f'parent1: {parent1}')
