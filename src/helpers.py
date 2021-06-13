@@ -9,7 +9,7 @@ def initializeXGBoostParameters():
     parameterList.append(UniformParameter(name="min_child_weight", bounds=(0, 10), mutationRate=3))
     parameterList.append(UniformParameter(name="max_delta_step", bounds=(0, 5), mutationRate=2))
     parameterList.append(UniformParameter(name="subsample", bounds=(0, 1), mutationRate=0.5))
-    parameterList.append(UniformParameter(name="scale_pos_weight", bounds=(1, 10), mutationRate=2))
+    #parameterList.append(UniformParameter(name="scale_pos_weight", bounds=(1, 10), mutationRate=2))        #"Parameters: { "scale_pos_weight" } might not be used" error
 
     return parameterList
 
