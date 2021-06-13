@@ -41,10 +41,17 @@ class XGBoostTuner:
             self.population.append(Phenotype())
 
     def crossover(self):
-        for phenotype in self.population:
+        new_population = []
+        while len(new_population) != POPULATION_SIZE:
+            first_parent = self.population[random.randint(0, POPULATION_SIZE - 1)]
+            second_parent = self.population[random.randint(0, POPULATION_SIZE - 1)]
             if random.uniform(0, 1) < CROSSOVER_PROB:
-                second_parent = self.population[random.randint(0, POPULATION_SIZE - 1)]
-                phenotype.crossover(second_parent)
+                new_population.append(Phenotype.crossover(first_parent, second_parent))
+            else:
+                new_population.append(first_parent)
+                if len(new_population) < POPULATION_SIZE:
+                    new_population.append(second_parent)
+        self.population = new_population
 
     def mutation(self):
         for phenotype in self.population:
