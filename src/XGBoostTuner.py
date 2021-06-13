@@ -1,12 +1,13 @@
 from sklearn.model_selection import train_test_split
 from Phenotype import Phenotype
+from Roulette import Roulette
 import random
 
-POPULATION_SIZE = 5
+POPULATION_SIZE = 20
 TEST_SIZE = 0.2
-CROSSOVER_PROB = 0.5
-PHENOTYPE_MUTATION_PROB = 0.05
-PARAMETER_MUTATION_PROB = 0.2
+CROSSOVER_PROB = 1
+PHENOTYPE_MUTATION_PROB = 0.5  
+PARAMETER_MUTATION_PROB = 0.5
 
 class XGBoostTuner:
     """
@@ -20,37 +21,41 @@ class XGBoostTuner:
     def __init__(self, X, y):
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=0)
         self.fitness_history = []
+        self.population = []
 
-    def run(self, iterations=5):
+    def run(self, iterations=10):
         self.generate_population()
         self.rating()
-        for i in range(iterations):
-            print (self.fitness_history)
-            #self.selection()
+        for _ in range(iterations):
+            print(self.fitness_history)
             self.crossover()
             self.mutation()
             self.rating()
+            p = max(self.population, key=lambda x: x.fitness_score)
+            print(f"Best phenotype: {p}")
+        print(self.fitness_history)
 
-    def selection(self):
-        pass
+    def sortPopulation(self):
+        self.population.sort(key=lambda p: p.fitness_score)
 
 
     def generate_population(self):
-        self.population = []
-        for x in range(POPULATION_SIZE):
+        for _ in range(POPULATION_SIZE):
             self.population.append(Phenotype())
 
     def crossover(self):
         new_population = []
+
+        self.sortPopulation()
+        roulette = Roulette(self.population)
         while len(new_population) != POPULATION_SIZE:
-            first_parent = self.population[random.randint(0, POPULATION_SIZE - 1)]
-            second_parent = self.population[random.randint(0, POPULATION_SIZE - 1)]
             if random.uniform(0, 1) < CROSSOVER_PROB:
+                first_parent_index, second_parent_index = roulette.chooseIndexes()
+                first_parent = self.population[first_parent_index]
+                second_parent = self.population[second_parent_index]
                 new_population.append(Phenotype.crossover(first_parent, second_parent))
             else:
-                new_population.append(first_parent)
-                if len(new_population) < POPULATION_SIZE:
-                    new_population.append(second_parent)
+                new_population.append(self.population[roulette.chooseIndex()])
         self.population = new_population
 
     def mutation(self):
