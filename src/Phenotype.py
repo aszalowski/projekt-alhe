@@ -1,7 +1,3 @@
-from helpers import initializeXGBoostParameters
-from Parameters import DiscreteParameter
-
-
 from sklearn.metrics import f1_score, accuracy_score
 import xgboost as xgb
 import random
@@ -14,8 +10,9 @@ class Phenotype:
     :param fitness_score: calculated fitness score for current parameters
     """
 
-    def __init__(self):
-        self.param_list = initializeXGBoostParameters()
+    def __init__(self, paramIniFunction):
+        self.paramIniFunction = paramIniFunction
+        self.param_list = paramIniFunction()
         self.fitness_score = None
         self.accuracy = None
 
@@ -46,15 +43,10 @@ class Phenotype:
 
     @staticmethod
     def crossover(parent1, parent2, crossover_point=0.5):
-        child = Phenotype()
+        child = Phenotype(parent1.paramIniFunction)
         for (child_param, p1, p2) in zip(child.param_list, parent1.param_list, parent2.param_list):
             if random.uniform(0, 1) < crossover_point:
                 child_param.value = p1.value
             else:
                 child_param.value = p2.value
-
-        # print("Created new child.")
-        # print(f'parent1: {parent1}')
-        # print(f'parent2: {parent2}')
-        # print(f'child: {child}')
         return child 
